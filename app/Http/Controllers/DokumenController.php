@@ -36,8 +36,11 @@ class DokumenController extends Controller
             'created_by' => 'nullable|string',
         ]);
 
-        $fileName = $request->dokumen_file->getClientOriginalName();
-        $request->dokumen_file->storeAs('public/documents', $fileName);
+        $fileName = str_replace(' ', '_', $request->dokumen_file->getClientOriginalName());
+        $path = $request->dokumen_file->storeAs('public/documents', $fileName);
+        
+        // Logging path
+        Log::info('File stored at: ' . $path);
         
         // Ambil pengguna yang sedang login
         $user = Auth::user();
@@ -61,6 +64,7 @@ class DokumenController extends Controller
         return redirect()->route('list-dokumen')->with('success', 'Dokumen berhasil ditambahkan!');
     }
 
+
     public function listDokumen()
     {
         $documents = Dokumen::where('status', '!=', 'draft')->get();
@@ -76,62 +80,63 @@ class DokumenController extends Controller
     $document = Dokumen::findOrFail($id);
     return view('edit', compact('document'));
     }
+    public function update(Request $request, $id)
+    {
+        $document = Dokumen::findOrFail($id);
+    
+        History::create([
+            'dokumen_id' => $document->id,
+            'judul_dokumen' => $document->judul_dokumen,
+            'deskripsi_dokumen' => $document->deskripsi_dokumen,
+            'kategori_dokumen' => $document->kategori_dokumen,
+            'validasi_dokumen' => $document->validasi_dokumen,
+            'tahun_dokumen' => $document->tahun_dokumen,
+            'dokumen_file' => $document->dokumen_file,
+            'tags' => $document->tags,
+            'created_by' =>$document->created_by,
+        ]);
+    
+        $validatedData = $request->validate([
+            'judul_dokumen' => 'required|string|max:255',
+            'deskripsi_dokumen' => 'required|string',
+            'kategori_dokumen' => 'required|string',
+            'validasi_dokumen' => 'required|string',
+            'tahun_dokumen' => 'required|integer',
+            'edit_dokumen_file' => 'nullable|file|mimes:pdf,docx,jpeg,png,jpg|max:2048',
+            'tags' => 'nullable|string',
+            'created_by' => 'nullable|string',
+        ]);
+        // Handle file yang diunggah
+        if ($request->hasFile('edit_dokumen_file')) {
+            $fileName = str_replace(' ', '_', $request->edit_dokumen_file->getClientOriginalName());
 
-public function update(Request $request, $id)
-{
-    $document = Dokumen::findOrFail($id);
+            // Simpan file lama ke dalam history
+            Storage::disk('public')->copy('documents/' . $document->dokumen_file, 'documents/history/' . $document->dokumen_file);
 
-    History::create([
-        'dokumen_id' => $document->id,
-        'judul_dokumen' => $document->judul_dokumen,
-        'deskripsi_dokumen' => $document->deskripsi_dokumen,
-        'kategori_dokumen' => $document->kategori_dokumen,
-        'validasi_dokumen' => $document->validasi_dokumen,
-        'tahun_dokumen' => $document->tahun_dokumen,
-        'dokumen_file' => $document->dokumen_file,
-        'tags' => $document->tags,
-        'created_by' =>$document->created_by,
-    ]);
-
-    $validatedData = $request->validate([
-        'judul_dokumen' => 'required|string|max:255',
-        'deskripsi_dokumen' => 'required|string',
-        'kategori_dokumen' => 'required|string',
-        'validasi_dokumen' => 'required|string',
-        'tahun_dokumen' => 'required|integer',
-        'dokumen_file' => 'nullable|file|mimes:pdf,docx,jpeg,png,jpg|max:2048',
-        'tags' => 'nullable|string',
-        'created_by' => 'nullable|string',
-    ]);
-
-    if ($request->hasFile('edit_dokumen_file')) {
-        if ($document->dokumen_file) {
-            Storage::disk('public')->delete('documents/' . $document->dokumen_file);
+            // Simpan file baru
+            $path = $request->edit_dokumen_file->storeAs('public/documents', $fileName);
+            $document->dokumen_file = $fileName;
         }
-        $fileName = $request->edit_dokumen_file->getClientOriginalName();
-        $request ->edit_dokumen_file->storeAs('public/documents', $fileName);
-        $document->dokumen_file = $fileName;
-    }
+        
+        $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+    
+        $document->judul_dokumen = $validatedData['judul_dokumen'];
+        $document->deskripsi_dokumen = $validatedData['deskripsi_dokumen'];
+        $document->kategori_dokumen = $validatedData['kategori_dokumen'];
+        $document->validasi_dokumen = $validatedData['validasi_dokumen'];
+        $document->tahun_dokumen = $validatedData['tahun_dokumen'];
+        $document->tags = $validatedData['tags'] ?? null;
+        $document->created_by = $validatedData['created_by'] ?? $user->name;
+        $document->save();
+    
+        Log::info('Document after update', ['document' => $document]);
 
-    $user = Auth::user();
-    if (!$user) {
-        return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+        return redirect()->route('list-dokumen')->with('success', 'Details dokumen berhasil diperbarui.');
     }
-
-    $document->judul_dokumen = $validatedData['judul_dokumen'];
-    $document->deskripsi_dokumen = $validatedData['deskripsi_dokumen'];
-    $document->kategori_dokumen = $validatedData['kategori_dokumen'];
-    $document->validasi_dokumen = $validatedData['validasi_dokumen'];
-    $document->tahun_dokumen = $validatedData['tahun_dokumen'];
-    if (isset($fileName)) {
-        $document->dokumen_file = $fileName;
-    }
-    $document->tags = $validatedData['tags'] ?? null;
-    $document->created_by = $validatedData['created_by'] ?? $user->name;
-    $document->save();
-
-    return redirect()->route('list-dokumen')->with('success', 'Details dokumen berhasil diperbarui.');
-}
+    
 
 
     public function moveToDraft($id)

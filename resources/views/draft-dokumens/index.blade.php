@@ -8,7 +8,7 @@
             <a class="nav-link" id="v-pills-home-tab" href="{{ route('home') }}" role="tab" aria-controls="v-pills-home" aria-selected="true">Home</a>
             <a class="nav-link" id="v-pills-profile-tab" href="{{ route('input-dokumen') }}" role="tab" aria-controls="v-pills-profile" aria-selected="false">Input Dokumen</a>
             <a class="nav-link" id="v-pills-messages-tab" href="{{ route('list-dokumen') }}" role="tab" aria-controls="v-pills-messages" aria-selected="false">List Dokumen</a>
-            <a class="nav-link active" id="v-pills-messages-tab" href="{{ route('draft-dokumen') }}" role="tab" aria-controls="v-pills-messages" aria-selected="false">Draft Dokumen</a>
+            <a class="nav-link active" id="v-pills-messages-tab" href="{{ route('draft-dokumen') }}" role="tab" aria-controls="v-pills-messages" aria-selected="false">Deleted Dokumen</a>
             @if(auth()->check() && auth()->user()->approved && (auth()->user()->jabatan === 'Admin' || auth()->user()->jabatan === 'Kaprodi'))
         <a class="nav-link" id="v-pills-messages-tab" href="{{ route('list-user') }}" role="tab" aria-controls="v-pills-messages" aria-selected="false">List User</a>
     @endif
@@ -16,7 +16,7 @@
         </div>
         <div class="col-md-9">
             <!-- Konten Draft Dokumen -->
-            <h3 class="judul">Draft Dokumen</h3>
+            <h3 class="judul">Deleted Dokumen</h3>
             @if (session('status'))
                 <div class="alert alert-success" style="margin-left:200px">
                     {{ session('status') }}
@@ -28,7 +28,7 @@
                 </div>
             @endif
           
-            <table class="table table-striped table-bordered" style="margin-left:200px">
+            <table class="table table-striped table-bordered" style="margin-left:200px" id="documentTableBody">
                 <thead>
                     <tr>
                         <th scope="col">No</th>
@@ -38,7 +38,7 @@
                         <th scope="col">Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody >
     @foreach ($draftDokumens as $index => $dokumen)
         <tr>
             <td>{{ $index + 1 }}</td>

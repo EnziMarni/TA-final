@@ -7,7 +7,7 @@
         <a class="nav-link" id="v-pills-home-tab" href="{{ route('home') }}" role="tab" aria-controls="v-pills-home" aria-selected="true">Home</a>
         <a class="nav-link active" id="v-pills-profile-tab" href="{{ route('input-dokumen') }}" role="tab" aria-controls="v-pills-profile" aria-selected="false">Input Dokumen</a>
         <a class="nav-link" id="v-pills-messages-tab" href="{{ route('list-dokumen') }}" role="tab" aria-controls="v-pills-messages" aria-selected="false">List Dokumen</a>
-        <a class="nav-link" id="v-pills-messages-tab" href="{{ route('draft-dokumen') }}" role="tab" aria-controls="v-pills-messages" aria-selected="false">Draft Dokumen</a>
+        <a class="nav-link" id="v-pills-messages-tab" href="{{ route('draft-dokumen') }}" role="tab" aria-controls="v-pills-messages" aria-selected="false">Deleted Dokumen</a>
         @if(auth()->check() && auth()->user()->approved && (auth()->user()->jabatan === 'Admin' || auth()->user()->jabatan === 'Kaprodi'))
         <a class="nav-link" id="v-pills-messages-tab" href="{{ route('list-user') }}" role="tab" aria-controls="v-pills-messages" aria-selected="false">List User</a>
     @endif
@@ -81,17 +81,50 @@
         <input type="number" class="form-control" name="tahun_dokumen" id="tahunDokumen" style="margin-left:200px; position:relative; z-index: 1;" min="1900" max="2100" required>
     </div>
 
-    <div class="mb-3">
-        <label for="formFile" class="form-label">Input File Dokumen:</label>
-        <input class="form-control" type="file" id="formFile" name="dokumen_file" style="margin-left:200px" required>
+    <div class="form-label">
+        <label for="fileOrLink">File Dokumen atau Link (salah satu, opsional):</label><br>
+        <input type="file" id="fileOrLink" name="file_or_link" accept=".pdf,.docx,.jpeg,.png,.jpg">
+        <input type="text" class="form-control mt-1" id="linkDokumen" name="link_dokumen">
     </div>
 
     <div class="form-label">
-        <div>
-            <label for="tags">Tags:</label>
-            <input type="text" id="tags" name="tags" data-role="tagsinput" class="form-control" placeholder="Add tags" required>
+    <div>
+        <label for="tags">Tags:</label>
+        <input type="text" id="tags" name="tags" data-role="tagsinput" class="form-control" placeholder="Add tags" required>
+    </div>
+</div>
+
+<div class="form-label">
+    <div>
+        <label for="permissions">Izinkan siapa saja yang melihat:</label>
+    </div>
+    <div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="kajur" name="permissions[]" value="kajur">
+            <label class="form-check-label" for="kajur">Kajur</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="sekjur" name="permissions[]" value="sekjur">
+            <label class="form-check-label" for="sekjur">Sekjur</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="kaprodi" name="permissions[]" value="kaprodi">
+            <label class="form-check-label" for="kaprodi">Kaprodi</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="dosen" name="permissions[]" value="dosen">
+            <label class="form-check-label" for="dosen">Dosen</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="adm" name="permissions[]" value="adm">
+            <label class="form-check-label" for="adm">Adm</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="mahasiswa" name="permissions[]" value="mahasiswa">
+            <label class="form-check-label" for="mahasiswa">Mahasiswa</label>
         </div>
     </div>
+</div>
 
     <div class="form-label">
         <div>

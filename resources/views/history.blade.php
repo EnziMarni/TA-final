@@ -20,7 +20,6 @@
             <i class="fas fa-arrow-left"></i> Back to List Dokumen
         </a>
 
-
         <!-- Modal -->
         <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -45,7 +44,7 @@
                                     <th scope="col">Dibuat Oleh</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="documentTableBody">
                                 @foreach ($histories as $index => $history)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
@@ -54,7 +53,15 @@
                                         <td>{{ $history->kategori_dokumen }}</td>
                                         <td>{{ $history->validasi_dokumen }}</td>
                                         <td>{{ $history->tahun_dokumen }}</td>
-                                        <td>{{ $history->dokumen_file }}</td>
+                                        <td>
+                                            @if($history->dokumen_file)
+                                                <a href="{{ asset('storage/documents/' . $history->dokumen_file) }}" target="_blank">
+                                                    <i class="fa fa-file"></i>
+                                                </a>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                         <td>{{ $history->tags }}</td>
                                         <td>{{ \Carbon\Carbon::parse($history->created_at)->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s') }}</td>
                                         <td>{{ $history->created_by }}</td>
